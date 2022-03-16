@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title></title>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <script th:src="@{/js/jquery-3.5.1.js}"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+
+    <style>
+        #main {
+            width: 850px;
+            /*height: 100px;*/
+            margin: 0 auto;
+        }
+
+    </style>
+
+</head>
+<body>
+<!--保存考试的 examCode-->
+<p th:text="${examCode}" id="examCode" hidden></p>
+
+<!--主节点-->
+<div id="main">
+
+</div>
+
+<div style="text-align:center">
+    <button class="layui-btn " id="submit">提交试卷</button>
+</div>
+
+<script type="text/text" id="up">
+   <div class = 'layui-quote-nm layui-elem-quote'>
+
+</script>
+<script type="text/text" id="down">
+   </div>
+
+</script>
+<!--选择题模板-->
+<script type="text/html" id="multiQuestionTemplate">
+    <br>
+    <from class="layui-form" action="">
+        <!--题目内容-->
+        <div>
+            <h3 class="layui-form-item" id="question" type="text">DNS服务器在名称解析过程中正确的查询顺序为（）</h3>
+        </div>
+        <br>
+        <!--四个选项-->
+        <div class="layui-form-item layui-elem-quote layui-quote-nm">
+            <label>A.</label>
+            <label id="A">答案内容</label>
+        </div>
+        <div class="layui-form-item layui-elem-quote layui-quote-nm">
+            <label>B.</label>
+            <label id="B">答案内容</label>
+        </div>
+        <div class="layui-form-item layui-elem-quote layui-quote-nm">
+            <label>C.</label>
+            <label id="C">答案内容</label>
+        </div>
+        <div class="layui-form-item layui-elem-quote layui-quote-nm">
+            <label>D.</label>
+            <label id="D">答案内容</label>
+        </div>
+        <!--考生答案-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">请选择答案</label>
+            <div class="layui-input-block">
+                <select id="answer">
+                    <option value=""></option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+        </div>
+    </from>
+    <hr>
+
+</script>
+<!--其他三种题型模板-->
+<script type="text/text" id="simpleTemplate">
+    <br>
+    <from class="layui-form" action="">
+        <!--题目内容-->
+        <div>
+            <h3 class="layui-form-item" id="question" type="text">DNS服务器在名称解析过程中正确的查询顺序为（）</h3>
+        </div>
+        <br>
+        <!--考生答案-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">你的答案:</label>
+            <div class="layui-input-inline">
+                <input id="answer" type="text" placeholder="填入答案" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </from>
+    <hr>
+</script>
+
+
+<script th:src="@{/layui/layui.js}" charset="utf-8"></script>
+
+<script type="text/javascript" th:inline="none">
+
+    let answerList = []
+    let questionId = []
+    let questionType = []
+
+    let len;
+
+    layui.use(['form'], function () {
+        var form = layui.form;
+
+        $.ajax({
+            type: "get",
+            url: '/paper/' + $("#examCode").text(),
+            success: function (data) {
+                //console.log(data)
+                let multiQuestions = data.data[1];
+                let fillQuestion = data.data[2];
+                let calQuestion = data.data[3];
+                let proveQuestion = data.data[4];
+
+                len = multiQuestions.length+fillQuestion.length+calQuestion.length+proveQuestion.length;
+
+                //生成html模板
+                let i = 0; //保存 总的下标
+                //选择题
+                for (let j = 0; j < multiQuestions.length; j++, i++) {
+                    questionId[i] = multiQuestions[j].questionId; //保存题目ID
+                    questionType[i] = '1';//选择题类型
+
+                    $("#main").append($("#multiQuestionTemplate").text());
+                    $("#question").attr("id", "question" + i);          //题干
+                    $("#A").attr("id", "A" + i);
+                    $("#B").attr("id", "B" + i);
+                    $("#C").attr("id", "C" + i);
+                    $("#D").attr("id", "D" + i);
+                    $("#answer").attr("id", "answer" + i);
+
+                    $("#question"+i).text(1+i+'.'+multiQuestions[j].question)
+                    $("#A"+i).text(multiQuestions[j].answerA)
+                    $("#B"+i).text(multiQuestions[j].answerB)
+                    $("#C"+i).text(multiQuestions[j].answerC)
+                    $("#D"+i).text(multiQuestions[j].answerD)
+                }
+                //填空题
+                for (let j = 0; j < fillQuestion.length; j++, i++) {
+                    questionId[i] = fillQuestion[j].questionId; //保存题目ID
+                    questionType[i] = '2';//填空题类型
+
+                    $("#main").append($("#simpleTemplate").text());
+                    $("#question").attr("id","question" + i);          //题干
+                    $("#answer").attr("id", "answer" + i);
+
+                    $("#question"+i).text(1+i+'.'+fillQuestion[j].question)
+
+                }
+                //填空题
+                for (let j = 0; j < calQuestion.length; j++, i++) {
+                    questionId[i] = calQuestion[j].questionId; //保存题目ID
+                    questionType[i] = '3';//填空题类型
+
+                    $("#main").append($("#simpleTemplate").text());
+                    $("#question").attr("id", "question" + i);          //题干
+                    $("#answer").attr("id", "answer" + i);
+
+                    $("#question"+i).text(1+i+'.'+calQuestion[j].question)
+                }
+                //填空题
+                for (let j = 0; j < proveQuestion.length; j++, i++) {
+                    questionId[i] = proveQuestion[j].questionId; //保存题目ID
+                    questionType[i] = '4';//填空题类型
+
+                    $("#main").append($("#simpleTemplate").text());
+
+                    $("#question").attr("id", "question" + i);          //题干
+                    $("#answer").attr("id", "answer" + i);
+
+                    $("#question"+i).text(1+i+'.'+proveQuestion[j].question)
+                }
+
+                form.render();
+                //然后给每个DOM赋值
+
+                console.log(questionType)
+                console.log(questionId)
+            }
+        })
+        form.render();
+    })
+
+    $("#submit").click(function () {
+        //获取所有答案
+        for (let i=0;i<len;i++){
+            answerList[i] =  $("#answer"+i).val() ;
+        }
+
+         $.ajax({
+            url: "/exam/submitAnswer",
+            data: {
+                "answerList": answerList,
+                "questionIdList": questionId,
+                "questionTypeList": questionType
+            },
+            dataType: "json",
+            type: "post",
+            traditional: true,
+            success: function (data) {
+                layer.confirm(data.message, function(index){
+                    top.location.href = "/studentIndex";
+                });
+            }
+        })
+
+    })
+
+
+
+</script>
+</body>
+</html>

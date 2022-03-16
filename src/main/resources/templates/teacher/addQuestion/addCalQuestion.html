@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{layui/css/layui.css}"  media="all">
+    <link rel="stylesheet" th:href="@{/editor/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/editor/css/editormd.css}" />
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+
+<form class="layui-form" action="">
+
+
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">科目</label>
+            <div class="layui-input-inline">
+                <select  name="subject"  lay-verify="required" lay-search="">
+                    <option value="">请选择科目</option>
+                    <option value="1">线性代数</option>
+                    <option value="2">高等数学</option>
+                    <option value="3">概率论</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+
+            <div class="layui-inline">
+                <label class="layui-form-label">单元</label>
+                <div class="layui-input-inline">
+                    <select name="section" lay-verify="required" lay-search="">
+                        <option value="">请选择单元</option>
+                        <option value="0">综合测试</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div align="left" class="layui-form-item layui-form-text">
+        <label class="layui-form-label">题目</label>
+        <div class="layui-input-block"  id="question">
+
+        </div>
+    </div>
+
+
+
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">答案</label>
+        <div class="layui-input-block" id="answer">
+
+        </div>
+    </div>
+
+
+
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">解析</label>
+        <div class="layui-input-block">
+            <textarea name="analysis" placeholder="请输入内容" class="layui-textarea"></textarea>
+        </div>
+    </div>
+
+    <div class="layui-inline">
+        <label class="layui-form-label">分数</label>
+        <div class="layui-input-inline">
+            <input type="tel" name="score" lay-verify="required|number" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item" style="margin-top: 30px;position:relative; left:-11px;">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+
+</form>
+
+
+<script th:src="@{layui/layui.js}" charset="utf-8"></script>
+<script th:src="@{js/jquery-3.5.1.js}" charset="utf-8"></script>
+<script th:src="@{/editor/js/jquery.min.js}"></script>
+<script th:src="@{/editor/js/editormd.js}"></script>
+<script th:src="@{/editor/plugins/image-dialog/image-dialog.js}"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+
+        //创建一个编辑器
+        var editIndex = layedit.build('LAY_demo_editor');
+
+        let questionEditor = editormd("question", {
+            width: "80%",
+            height: 300,
+            path : '/editor/lib/',
+            //theme : "dark",
+            //previewTheme : "dark",
+            //editorTheme : "pastel-on-dark",
+            // markdown : md,
+            codeFold : true,
+            //syncScrolling : false,
+            saveHTMLToTextarea : true,    // 保存 HTML 到 Textarea
+            toolbarAutoFixed:true,//工具栏自动固定定位的开启与禁用
+            searchReplace : true,
+            //watch : false,                // 关闭实时预览
+            htmlDecode : "style,script,iframe|on*",            // 开启 HTML 标签解析，为了安全性，默认不开启
+            //toolbar  : false,             //关闭工具栏
+            //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
+            emoji : true,
+            taskList : true,
+            tocm            : true,         // Using [TOCM]
+            tex : true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart : true,             // 开启流程图支持，默认关闭
+            sequenceDiagram : true,       // 开启时序/序列图支持，默认关闭,
+            onload : function() {
+                console.log('onload', this);
+                this.hideToolbar();
+            }
+        });
+        let answerEditor = editormd("answer", {
+            width: "80%",
+            height: 300,
+            path : '/editor/lib/',
+            //theme : "dark",
+            //previewTheme : "dark",
+            //editorTheme : "pastel-on-dark",
+            // markdown : md,
+            codeFold : true,
+            //syncScrolling : false,
+            saveHTMLToTextarea : true,    // 保存 HTML 到 Textarea
+            toolbarAutoFixed:true,//工具栏自动固定定位的开启与禁用
+            searchReplace : true,
+            //watch : false,                // 关闭实时预览
+            htmlDecode : "style,script,iframe|on*",            // 开启 HTML 标签解析，为了安全性，默认不开启
+            //toolbar  : false,             //关闭工具栏
+            //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
+            emoji : true,
+            taskList : true,
+            tocm            : true,         // Using [TOCM]
+            tex : true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart : true,             // 开启流程图支持，默认关闭
+            sequenceDiagram : true,       // 开启时序/序列图支持，默认关闭,
+            onload : function() {
+                console.log('onload', this);
+                this.hideToolbar();
+            }
+        });
+
+        //监听提交
+        form.on('submit(demo1)', function(data){
+            //console.log(data.field);
+            data.field['question'] = questionEditor.getMarkdown();
+            data.field['answer'] = answerEditor.getMarkdown();
+            $.ajax({
+                type:"post",
+                data:data.field,
+                url:'/question/calQuestion',
+                success:function (data) {
+                    //没有权限
+                    if(data.code==403){
+                        layer.alert(data.message);
+                    }else if(data.code==200){
+                        //成功
+                        layer.alert(data.message);
+                    }else {
+                        window.top.location = "/"
+                    }
+                }
+            })
+            // layer.alert(JSON.stringify(data.field), {
+            //     title: '最终的提交信息'
+            // })
+            return false;
+        });
+
+        // //表单取值
+        // layui.$('#LAY-component-form-getval').on('click', function(){
+        //   var data = form.val('example');
+        //   alert(JSON.stringify(data));
+        // });
+
+    });
+</script>
+
+</body>
+</html>

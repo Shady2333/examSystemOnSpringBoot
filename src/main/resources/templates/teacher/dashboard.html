@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" th:href="@{layui/css/layui.css}"  media="all">
+    <script th:src="@{js/jquery-3.5.1.js}"></script>
+    <script>
+        function change(title){
+            // $.ajax({
+            //     type:'get',
+            //     url:"/judgeSession",
+            //     success:function (data){
+            //         if(data=="false"){
+            //             window.location.href = "/"
+            //         }
+            //     }
+            // })
+            $('iframe').attr('src',title);
+        }
+    </script>
+</head>
+
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">数学在线考试系统</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="">1</a></li>
+            <li class="layui-nav-item"><a href="">1</a></li>
+            <li class="layui-nav-item"><a href="">1</a></li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">1</a></dd>
+                    <dd><a href="">1</a></dd>
+                    <dd><a href="">1</a></dd>
+                </dl>
+            </li>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1600263567501&di=75ff6536df4dc269141c1fb9019aed92&imgtype=0&src=http%3A%2F%2Fi10.hoopchina.com.cn%2Fhupuapp%2Fbbs%2F17091253844363%2Fthread_17091253844363_20180728200254_s_11151_o_w_192_h_185_86937.jpg%3Fx-oss-process%3Dimage%2Fresize%2Cw_365%2Fformat%2Cjpg" class="layui-nav-img">
+                    老师
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                    <dd><a href="">安全设置</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="/quit">退出登录</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="" href="javascript:;">学生管理</a>
+                    <dl class="layui-nav-child">
+                        <dd class="layui-this"><a href="javascript:;" onclick="change('/studentsPage')">学生查询</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">试题查询</a>
+                    <dl class="layui-nav-child">
+                    <dd><a href="javascript:;" onclick="change('/multiQuestionsPage')">选择题</a></dd>
+                    <dd><a href="javascript:;" onclick="change('/fillQuestionsPage')">填空题</a></dd>
+                    <dd><a href="javascript:;" onclick="change('/calQuestionsPage')">计算题</a></dd>
+                    <dd><a href="javascript:;" onclick="change('/proveQuestionsPage')">证明题</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">增加试题</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;" onclick="change('/addMultiQuestionPage')">增加选择题</a></dd>
+                        <dd><a href="javascript:;" onclick="change('/addFillQuestionPage')">增加填空题</a></dd>
+                        <dd><a href="javascript:;" onclick="change('/addCalQuestionPage')">增加计算题</a></dd>
+                        <dd><a href="javascript:;" onclick="change('/addProveQuestionPage')">增加证明题</a></dd>
+                    </dl>
+                </li>|
+                <li class="layui-nav-item">
+                    <a href="javascript:;">考试信息</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;" onclick="change('/toExamPage')">考试管理</a></dd>
+                        <dd><a href="javascript:;" onclick="change('/toAddExamPage')">增加考试</a></dd>
+                        <dd><a href="javascript:;" onclick="change('/toPaperPage')">批改试卷</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" style="overflow: hidden;top: 0px;bottom: 0px">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <iframe src="/studentsPage" frameborder="0" id="demoAdmin" style="width: 100%;height: 100%;position: absolute"></iframe>
+        </div>
+    </div>
+
+
+
+</div>
+<script th:src="@{layui/layui.js}" charset="utf-8"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function(){
+        var element = layui.element;
+
+    });
+</script>
+</body>
+</html>

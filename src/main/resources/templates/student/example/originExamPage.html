@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title></title>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <script th:src="@{/js/jquery-3.5.1.js}"></script>
+    <!--<script type="text/javascript"-->
+    <!--th:src="@{http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML}">-->
+    <!--</script>-->
+
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+
+    <style>
+        #main {
+            width: 800px;
+            /*height: 100px;*/
+            margin: 0 auto;
+        }
+        #button {
+            width: 800px;
+            /*height: 100px;*/
+            margin: 0 auto;
+        }
+        textarea{
+            width: 800px;
+            height:200px;
+            margin: 0 auto;
+        }
+        .layui-elem-my{
+            margin-bottom:10px;padding:15px;
+            line-height:22px;
+            border-left:5px solid #E6E6FA;
+            border-radius:0 2px 2px 0;
+            background-color:#FFFFFF
+        }
+    </style>
+
+</head>
+<body>
+
+<table class="layui-hide" id="test" lay-filter="test"></table>
+
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
+        <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>
+    </div>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="join">参加考试</a>
+</script>
+
+
+<div>
+
+    <br>
+    <br>
+
+    <div class="col-md-5"></div>
+
+
+    <div >
+
+        <div class="white-box align-items-md-center  " id="main">
+
+        </div>
+
+    </div>
+
+    <div class="layui-form-item" id="button">
+        <button class="layui-btn" id="submit">提交</button>
+    </div>
+
+</div>
+
+<hr>
+
+
+
+测试公式样例
+<hr>
+<p>$$\frac{\partial f}{\partial x} = 2\,\sqrt{a}\,x$$</p>
+
+
+<script th:src="@{/layui/layui.js}" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<script type="text/javascript" th:inline="none">
+
+
+    layui.use('form', function () {
+        var form = layui.form;
+
+    var examCode;
+
+    var html = '';
+    var i = 1;
+    var multiQuestionLen;
+    var fillQuestionLen;
+    var calQuestionLen;
+    var proveQuestionLen;
+    var questionLen; //题目总个数
+
+
+    var answerList = []
+    var questionId = []
+    var questionType = []
+
+
+    $.ajax({
+        type: "get",
+        url: '/session/getExamingExamCode',
+        success: function (data) {
+            examCode = data;
+            //console.log(examCode)
+            $.ajax({
+                type: "get",
+                url: '/paper/' + examCode,
+                success: function (data) {
+                    var question = data.data
+                    var multiQuestion = question[1];
+                    var fillQuestion = question[2];
+                    var calQuestion = question[3];
+                    var proveQuestion = question[4];
+                    multiQuestionLen = multiQuestion.length;
+                    fillQuestionLen = fillQuestion.length;
+                    calQuestionLen = calQuestion.length;
+                    proveQuestionLen = proveQuestion.length;
+                    questionLen = multiQuestionLen + fillQuestionLen + calQuestionLen + proveQuestionLen;
+                    //console.log(fillQuestion[0]);
+                    html+="<form class=\"layui-form\" action=\"\">"
+                    html+= "                    <h2  class=\"col-md-12\" >一. 选择题</h2>\n"
+
+
+                    for (let j = 0; j < multiQuestion.length; j++) {
+
+                        html+="<div class='layui-elem-my'>"
+
+                        html += "<div class=\"form-horizontal form-material\">\n" +
+                            "\n" +
+                            "                <div class=\"form-group\">\n" +
+                            "                    <div class=\"col-md-12\">\n" +
+                            "    <br>\n" +
+                            // "                        <textarea id=\"question" + i + "\" rows=\"7\" type=\"text\" class=\"form-control form-control-line\"></textarea>\n" +
+                            "                        <div id=\"question" + i + "\" type=\"text\" ></div>\n" +
+                            "    <br>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+
+                            "                <div >\n" +
+                            "                <label class=\"col-md-1\">A</label>\n" +
+                            "                <label class=\"col-md-11\" id=\"A" + i + "\">A</label>\n" +
+                            "                </div>\n" +
+                            "    <br>\n" +
+                            "                <div >\n" +
+                            "                <label class=\"col-md-1\">B</label>\n" +
+                            "                <label class=\"col-md-11\" id=\"B" + i + "\">A</label>\n" +
+                            "                </div>\n" +
+                            "    <br>\n" +
+                            "                <div >\n" +
+                            "                <label class=\"col-md-1\">C</label>\n" +
+                            "                <label class=\"col-md-11\" id=\"C" + i + "\">A</label>\n" +
+                            "                </div>\n" +
+                            "    <br>\n" +
+                            "                <div >\n" +
+                            "                <label class=\"col-md-1\">D</label>\n" +
+                            "                <label class=\"col-md-11\" id=\"D" + i + "\">A</label>\n" +
+                            "                </div>\n" +
+                            "    <br>\n" +
+                            "                <div class='layui-form-item'>" +
+
+
+                            // "                    <label class=\"col-md-12 layui-form-label\">Answer</label>\n" +
+                            "                    <div class=\"col-md-12 layui-input-block\">\n" +
+                            "                        <select id=\"Answer"+i+"\"  name=\"interest\" >\n" +
+                            "                            <option value=\"\">请选择答案</option>\n"+
+                            "                            <option value=\"A\">A</option>\n" +
+                            "                            <option value=\"B\">B</option>\n" +
+                            "                            <option value=\"C\">C</option>\n" +
+                            "                            <option value=\"D\">D</option>\n" +
+                            "                        </select>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+
+                            "                <hr>\n" +
+                            "            </div>"
+
+                        html+="</div>"
+
+                        i = i + 1;
+                    }
+
+                    html+= "                    <h2  class=\"col-md-12\" >二. 填空题</h2>\n"
+
+                    for (let j = 0; j < fillQuestion.length; j++) {
+                        html += "            <div class=\"form-horizontal form-material\">\n" +
+                            "                <div class=\"form-group\">\n" +
+                            "                    <div class=\"col-md-12\">\n" +
+                            "    <br>\n" +
+                            // "                        <textarea id=\"question" + i + "\"   rows=\"7\" class=\"form-control form-control-line\"></textarea>\n" +
+                            "                        <div id=\"question" + i + "\" type=\"text\" ></div>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+                            "\n" +
+
+                            "    <br>\n" +
+
+                            "                <div class=\"form-group\">\n" +
+                            "                    <label class=\"col-md-12\">Answer</label>\n" +
+                            "                    <div class=\"col-md-12\">\n" +
+                            "                        <textarea  class='form-control' id=\"Answer" + i + "\"  rows=\"3\" class=\"form-control form-control-line\"></textarea>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+                            "\n" +
+                            "            </div>"+
+                            "            <hr>\n"
+                        i = i + 1;
+                    }
+                    html+= "                    <h2  class=\"col-md-12\" >三. 计算题</h2>\n"
+                    for (let j = 0; j < calQuestion.length; j++) {
+                        html += "            <div class=\"form-horizontal form-material\">\n" +
+                            "                <div class=\"form-group\">\n" +
+                            "                    <div class=\"col-md-12\">\n" +
+                            "    <br>\n" +
+                            // "                        <textarea id=\"question" + i + "\" rows=\"7\" class=\"form-control form-control-line\"></textarea>\n" +
+                            "                        <div id=\"question" + i + "\" type=\"text\" ></div>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+                            "\n" +
+
+                            "    <br>\n" +
+
+                            "                <div class=\"form-group\">\n" +
+                            "                    <label class=\"col-md-12\">Answer</label>\n" +
+                            "                    <div class=\"col-md-12\">\n" +
+                            "                        <textarea  id=\"Answer" + i + "\"  rows=\"3\" class=\"form-control form-control-line\"></textarea>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+                            "\n" +
+                            "            </div>"+
+                        "                <hr>\n"
+                        i = i + 1;
+                    }
+                    html+= "                    <h2  class=\"col-md-12\" >四. 证明题</h2>\n"
+                    for (let j = 0; j < proveQuestion.length; j++) {
+                        html += "            <div class=\"form-horizontal form-material\">\n" +
+                            "                <div class=\"form-group\">\n" +
+                            "                    <div class=\"col-md-12\">\n" +
+                            "    <br>\n" +
+                            // "                        <textarea id=\"question" + i + "\"  rows=\"7\" class=\"form-control form-control-line\"></textarea>\n" +
+                            "                        <div id=\"question" + i + "\" type=\"text\" ></div>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+                            "\n" +
+
+                            "    <br>\n" +
+
+                            "                <div class=\"form-group\">\n" +
+                            "                    <label class=\"col-md-12\">Answer</label>\n" +
+                            "                    <div class=\"col-md-12\">\n" +
+                            "                        <textarea  id=\"Answer" + i + "\"  rows=\"3\" class=\"form-control form-control-line\"></textarea>\n" +
+                            "                    </div>\n" +
+                            "                </div>\n" +
+
+                            "\n" +
+                            "            </div>"+
+                        "                <hr>\n"
+                        i = i + 1;
+                    }
+                    html+="</form>"
+                    $("#main").html(html);
+
+                    form.render();
+                    // $("#question"+'1').val(proveQuestion[0].question)
+                    i = 1;
+
+                    for (var j = 0; j < multiQuestion.length; j++) {
+
+                        questionId[i - 1] = multiQuestion[j].questionId;
+                        questionType[i - 1] = '1';//题目类型
+
+                        $("#question" + i).text(multiQuestion[j].question);
+                        $("#A" + i).text(multiQuestion[j].answerA);
+                        $("#B" + i).text(multiQuestion[j].answerB);
+                        $("#C" + i).text(multiQuestion[j].answerC);
+                        $("#D" + i).text(multiQuestion[j].answerD);
+                        //console.log(multiQuestion[j])
+                        i++;
+                    }
+
+                    for (var j = 0; j < fillQuestion.length; j++) {
+
+                        questionId[i - 1] = fillQuestion[j].questionId;
+                        questionType[i - 1] = '2';//题目类型
+
+
+                        $("#question" + i).text(fillQuestion[j].question);
+                        //console.log(fillQuestion[j])
+                        i++;
+                    }
+                    for (var j = 0; j < calQuestion.length; j++) {
+
+                        questionId[i - 1] = calQuestion[j].questionId;
+                        questionType[i - 1] = '3';//题目类型
+
+
+                        $("#question" + i).text(calQuestion[j].question);
+                        //console.log(calQuestion[j])
+                        i++;
+                    }
+                    for (var j = 0; j < proveQuestion.length; j++) {
+
+                        questionId[i - 1] = proveQuestion.questionId
+                        questionType[i - 1] = '4';//题目类型
+
+                        $("#question" + i).text(proveQuestion[j].question);
+                        //console.log(proveQuestion[j].question)
+                        i++;
+                    }
+                }
+
+            });
+        }
+    });
+
+
+        $("#submit").click(function () {
+            for (let j = 1; j < questionLen + 1; j++) {
+                let answer = $("#Answer" + j).val();
+                console.log(answer);
+                answerList[j - 1] = answer;
+            }
+            console.log(answerList);
+
+            $.ajax({
+                url: "/exam/submitAnswer",
+                data: {
+                    "answerList": answerList,
+                    "questionIdList": questionId,
+                    "questionTypeList": questionType
+                },
+                dataType: "json",
+                type: "post",
+                traditional: true,
+                success: function (data) {
+                    layer.alert("提交了试卷" + data.data);
+                    console.log(data);
+                }
+
+            })
+        })
+
+
+        form.render();
+    });
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title></title>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <script th:src="@{/js/jquery-3.5.1.js}"></script>
+    <!--引入editor.md-->
+    <link rel="stylesheet" th:href="@{/editor/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/editor/css/editormd.css}" />
+
+    <script th:inline="none">
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+
+    <style>
+        #main {
+            width: 1000px;
+            /*height: 100px;*/
+            margin: 0 auto;
+        }
+        /*div无法点击*/
+        .div-cant-click {
+            pointer-events: none;
+        }
+
+    </style>
+
+</head>
+<body>
+<!--保存考试的 examCode-->
+<p th:text="${examCode}" id="examCode" hidden></p>
+
+<!--主节点-->
+<div id="main">
+
+</div>
+
+<div style="text-align:center">
+    <button class="layui-btn " id="submit">提交试卷</button>
+</div>
+
+<script type="text/text" id="up">
+   <div class = 'layui-quote-nm layui-elem-quote'>
+
+</script>
+<script type="text/text" id="down">
+   </div>
+
+</script>
+<!--选择题模板-->
+<script type="text/html" id="multiQuestionTemplate">
+    <br>
+    <from class="layui-form" action="">
+        <!--题目内容-->
+        <div align="left">
+            <h3 class="layui-form-item" id="question" type="text"></h3>
+        </div>
+        <br>
+        <!--四个选项-->
+        <div align="left" class="layui-form-item layui-elem-quote layui-quote-nm">
+            <label>A.</label>
+            <label id="A">答案内容</label>
+        </div>
+        <div  align="left" class="layui-form-item layui-elem-quote layui-quote-nm">
+            <label>B.</label>
+            <label id="B">答案内容</label>
+        </div>
+        <div align="left" class="layui-form-item layui-elem-quote layui-quote-nm">
+            <label>C.</label>
+            <label id="C">答案内容</label>
+        </div>
+        <div align="left" class="layui-form-item layui-elem-quote layui-quote-nm">
+            <label>D.</label>
+            <label id="D">答案内容</label>
+        </div>
+        <!--考生答案-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">答案</label>
+            <div class="layui-input-block">
+                <select id="answer">
+                    <option value=""></option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+        </div>
+    </from>
+    <hr>
+
+</script>
+<!--填空题型模板-->
+<script type="text/text" id="simpleTemplate">
+    <br>
+    <from class="layui-form" action="">
+        <!--题目内容-->
+        <div align="left">
+            <h3 class="layui-form-item" id="question" type="text"></h3>
+        </div>
+        <br>
+        <!--考生答案-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">答案:</label>
+            <div class="layui-input-inline">
+                <input id="answer" type="text" placeholder="填入答案" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </from>
+    <hr>
+</script>
+<!--计算和证明题-->
+<script type="text/text" id="EditorTemplate">
+    <br>
+    <from class="layui-form" action="">
+        <!--题目内容-->
+        <div align="left">
+            <h3 class="layui-form-item" id="question" type="text">DNS服务器在名称解析过程中正确的查询顺序为（）</h3>
+        </div>
+        <br>
+        <!--考生答案-->
+<!--        <label class="layui-form-label" AutoSize=true text="你的答案:">答案</label>-->
+        <div class="layui-form-item">
+            <div  id="answer">
+
+            </div>
+        </div>
+    </from>
+    <hr>
+</script>
+
+
+<script th:src="@{/layui/layui.js}" charset="utf-8"></script>
+
+<script th:src="@{/editor/js/jquery.min.js}"></script>
+<script th:src="@{/editor/js/editormd.js}"></script>
+
+<script type="text/javascript" th:inline="none">
+
+    let answerList = []
+    let questionId = []
+    let questionType = []
+    var editorList = []
+
+    let len; //题目总的个数
+
+    let lenMulFill;//填空题+选择题个数
+
+    layui.use(['form','layer'], function () {
+        var form = layui.form;
+        let layer = layui.layer;
+        $.ajax({
+            type: "get",
+            url: '/paper/' + $("#examCode").text(),
+            success: function (data) {
+                //console.log(data)
+                let multiQuestions = data.data[1];
+                let fillQuestion = data.data[2];
+                let calQuestion = data.data[3];
+                let proveQuestion = data.data[4];
+
+                len = multiQuestions.length+fillQuestion.length+calQuestion.length+proveQuestion.length;
+                lenMulFill = multiQuestions.length+fillQuestion.length;
+                //生成html模板
+                let i = 0; //保存 总的下标
+                //选择题
+                for (let j = 0; j < multiQuestions.length; j++, i++) {
+                    questionId[i] = multiQuestions[j].questionId; //保存题目ID
+                    questionType[i] = '1';//选择题类型
+
+                    $("#main").append($("#multiQuestionTemplate").text());
+                    $("#question").attr("id", "question" + i);          //题干
+                    $("#A").attr("id", "A" + i);
+                    $("#B").attr("id", "B" + i);
+                    $("#C").attr("id", "C" + i);
+                    $("#D").attr("id", "D" + i);
+                    $("#answer").attr("id", "answer" + i);
+
+                    $("#question"+i).text(1+i+'.'+multiQuestions[j].question)
+                    $("#A"+i).text(multiQuestions[j].answerA)
+                    $("#B"+i).text(multiQuestions[j].answerB)
+                    $("#C"+i).text(multiQuestions[j].answerC)
+                    $("#D"+i).text(multiQuestions[j].answerD)
+
+                    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, "question"+i]);
+                    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, "A"+i]);
+                    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, "B"+i]);
+                    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, "C"+i]);
+                    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, "D"+i]);
+
+                }
+                //填空题
+                for (let j = 0; j < fillQuestion.length; j++, i++) {
+                    questionId[i] = fillQuestion[j].questionId; //保存题目ID
+                    questionType[i] = '2';//填空题类型
+
+                    $("#main").append($("#simpleTemplate").text());
+                    $("#question").attr("id","question" + i);          //题干
+                    $("#answer").attr("id", "answer" + i);
+
+                    $("#question"+i).text(1+i+'.'+fillQuestion[j].question)
+
+                    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, "question"+i]);
+
+                }
+                //计算
+                for (let j = 0; j < calQuestion.length; j++, i++) {
+                    questionId[i] = calQuestion[j].questionId; //保存题目ID
+                    questionType[i] = '3';//填空题类型
+
+                    $("#main").append($("#EditorTemplate").text());
+                    $("#question").attr("id", "question" + i);          //题干
+                    $("#answer").attr("id", "answer" + i);
+
+
+
+                    editorList[i] = editormd("answer"+i, {
+                        placeholder : '欢迎使用,编写数学公式请使用 latex格式,推荐使用MathType编辑后复制出来',
+                        width: "100%",
+                        height: 400,
+                        path : '/editor/lib/',
+                        //theme : "dark",
+                        //previewTheme : "dark",
+                        //editorTheme : "pastel-on-dark",
+                        // markdown : md,
+                        codeFold : true,
+                        //syncScrolling : false,
+                        saveHTMLToTextarea : true,    // 保存 HTML 到 Textarea
+                        searchReplace : true,
+                        //watch : false,                // 关闭实时预览
+                        htmlDecode : "style,script,iframe|on*",            // 开启 HTML 标签解析，为了安全性，默认不开启
+                        //toolbar  : false,             //关闭工具栏
+                        //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
+                        emoji : true,
+                        taskList : true,
+                        tocm            : true,         // Using [TOCM]
+                        tex : true,                   // 开启科学公式TeX语言支持，默认关闭
+                        flowChart : true,             // 开启流程图支持，默认关闭
+                        sequenceDiagram : true,       // 开启时序/序列图支持，默认关闭,
+                        //dialogLockScreen : false,   // 设置弹出层对话框不锁屏，全局通用，默认为true
+                        //dialogShowMask : false,     // 设置弹出层对话框显示透明遮罩层，全局通用，默认为true
+                        //dialogDraggable : false,    // 设置弹出层对话框不可拖动，全局通用，默认为true
+                        //dialogMaskOpacity : 0.4,    // 设置透明遮罩层的透明度，全局通用，默认值为0.1
+                        //dialogMaskBgColor : "#000", // 设置透明遮罩层的背景颜色，全局通用，默认为#fff
+                        imageUpload : true,
+                        imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                        imageUploadURL : "/image/upload",
+                        onload : function() {
+                            console.log('onload', this);
+                            this.hideToolbar();
+                            //this.fullscreen();
+                            //this.unwatch();
+                            //this.watch().fullscreen();
+
+                            //this.setMarkdown("#PHP");
+                            //this.width("100%");
+                            //this.height(480);
+                            //this.resize("100%", 640);
+                        }
+                        // });
+                    });
+
+                    $("#question"+i).text(1+i+'.'+calQuestion[j].question)
+
+                    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, "question"+i]);
+                }
+                //证明
+                for (let j = 0; j < proveQuestion.length; j++, i++) {
+                    questionId[i] = proveQuestion[j].questionId; //保存题目ID
+                    questionType[i] = '4';//填空题类型
+
+                    $("#main").append($("#EditorTemplate").text());
+
+                    $("#question").attr("id", "question" + i);          //题干
+                    $("#answer").attr("id", "answer" + i);
+
+                    editorList[i] = editormd("answer"+i, {
+                        placeholder : '欢迎使用,编写数学公式请使用 latex格式,推荐使用MathType编辑后复制出来',
+                        width: "100%",
+                        height: 400,
+                        path : '/editor/lib/',
+                        //theme : "dark",
+                        //previewTheme : "dark",
+                        //editorTheme : "pastel-on-dark",
+                        // markdown : md,
+                        codeFold : true,
+                        //syncScrolling : false,
+                        saveHTMLToTextarea : true,    // 保存 HTML 到 Textarea
+                        searchReplace : true,
+                        //watch : false,                // 关闭实时预览
+                        htmlDecode : "style,script,iframe|on*",            // 开启 HTML 标签解析，为了安全性，默认不开启
+                        //toolbar  : false,             //关闭工具栏
+                        //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
+                        emoji : true,
+                        taskList : true,
+                        tocm            : true,         // Using [TOCM]
+                        tex : true,                   // 开启科学公式TeX语言支持，默认关闭
+                        flowChart : true,             // 开启流程图支持，默认关闭
+                        sequenceDiagram : true,       // 开启时序/序列图支持，默认关闭,
+                        //dialogLockScreen : false,   // 设置弹出层对话框不锁屏，全局通用，默认为true
+                        //dialogShowMask : false,     // 设置弹出层对话框显示透明遮罩层，全局通用，默认为true
+                        //dialogDraggable : false,    // 设置弹出层对话框不可拖动，全局通用，默认为true
+                        //dialogMaskOpacity : 0.4,    // 设置透明遮罩层的透明度，全局通用，默认值为0.1
+                        //dialogMaskBgColor : "#000", // 设置透明遮罩层的背景颜色，全局通用，默认为#fff
+                        imageUpload : true,
+                        imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                        imageUploadURL : "/image/upload",
+                        onload : function() {
+                            //console.log('onload', this);
+                            this.hideToolbar();
+                            //this.fullscreen();
+                            //this.unwatch();
+                            //this.watch().fullscreen();
+
+                            //this.setMarkdown("#PHP");
+                            //this.width("100%");
+                            //this.height(480);
+                            //this.resize("100%", 640);
+                        }
+                        // });
+                    });
+
+                    $("#question"+i).text(1+i+'.'+proveQuestion[j].question)
+
+                    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, "question"+i]);
+                }
+
+                form.render();
+                //然后给每个DOM赋值
+
+            }
+        })
+
+        $("#submit").click(function () {
+            $("#submit").addClass("div-cant-click")
+            //获取所有答案
+            let i = 0;
+            for (let i=0;i<len;i++){
+                if(i<lenMulFill){
+                    answerList[i] =  $("#answer"+i).val() ;
+                }else {
+                    answerList[i] = editorList[i].getMarkdown();
+                }
+            }
+
+            //console.log(answerList);
+            $.ajax({
+                url: "/exam/submitAnswer",
+                data: {
+                    "answerList": answerList,
+                    "questionIdList": questionId,
+                    "questionTypeList": questionType,
+                    "examCode": $("#examCode").text()
+                },
+                dataType: "json",
+                type: "post",
+                traditional: true,
+                success: function (data) {
+                    if(data.code==411){
+                        $("#submit").removeClass("div-cant-click")
+                        layer.alert(data.message);
+                    }else {
+                        // layer.confirm(data.message, function(index){
+                        //     top.location.href = "/studentIndex";
+                        // });
+                        layer.confirm(data.message,{
+                            btn: ['确认'],
+                            btn1: function(){
+                                top.location.href = "/studentIndex";
+                            }
+                        });
+                    }
+
+                }
+            })
+
+        })
+        //form.render();
+    })
+
+
+
+
+</script>
+</body>
+</html>

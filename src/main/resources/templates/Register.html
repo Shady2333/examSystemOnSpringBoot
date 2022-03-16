@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>online exam login</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" th:href="@{/admin/dist/img/favicon.png}"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" th:href="@{/admin/dist/css/font-awesome.min.css}">
+    <!-- Ionicons -->
+    <link rel="stylesheet" th:href="@{/admin/dist/css/ionicons.min.css}">
+    <!-- Theme style -->
+    <link rel="stylesheet" th:href="@{/admin/dist/css/adminlte.min.css}">
+    <script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js"></script>
+    <style>
+        canvas {
+            display: block;
+            vertical-align: bottom;
+        }
+        #particles {
+            background-color: #F7FAFC;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+    </style>
+
+    <script type="text/javascript">
+        /**
+         * 注册
+         */
+
+
+    </script>
+</head>
+<body class="hold-transition login-page">
+
+<div id="particles">
+</div>
+<div class="login-box">
+    <div class="login-logo" style="color: #0C0C0C;">
+        <h1>注册</h1>
+    </div>
+    <!-- /.login-logo -->
+    <div class="card">
+        <div class="card-body login-card-body">
+            <p class="login-box-msg"><a href="https://imgchr.com/i/rGmLkD"><img src="https://s3.ax1x.com/2020/12/17/rGmLkD.jpg" alt="rGmLkD.jpg" border="0" width="100" height="80"/></a></p>
+
+                <div th:if="${not #strings.isEmpty(session.errorMsg)}" class="form-group">
+                    <div class="alert alert-danger" th:text="${session.errorMsg}"></div>
+                </div>
+
+                <div class="form-group has-feedback">
+                    <span class="fa fa-user form-control-feedback"></span>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="请输入学号"
+                           required="true">
+                </div>
+                    <span id="msg1"></span>
+
+                <div class="form-group has-feedback">
+                    <span class="fa fa-lock form-control-feedback"></span>
+                    <input type="password" id="fake_password"  class="form-control" placeholder="请输入密码"
+                           required="true">
+                </div>
+                <input type="hidden" id="md5_password" name="pwd">
+
+                <!--                这里没有加验证码资源-->
+                <!--                <div class="row">-->
+                <!--                    <div class="col-6">-->
+                <!--                        <input type="text" class="form-control" name="verifyCode" placeholder="请输入验证码" required="true">-->
+                <!--                    </div>-->
+                <!--                    <div class="col-6">-->
+                <!--                        <img alt="单击图片刷新！" class="pointer" th:src="@{/common/kaptcha}"-->
+                <!--                             onclick="this.src='/common/kaptcha?d='+new Date()*1">-->
+                <!--                    </div>-->
+                <!--                </div>-->
+                <div class="form-group has-feedback"></div>
+                <div class="row">
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                        <button  type="submit" onclick="my_md5()" class="btn btn-primary btn-block btn-flat">注册
+                        </button>
+                    </div>
+                </div>
+
+
+
+        </div>
+        <!-- /.login-card-body -->
+    </div>
+</div>
+<!-- /.login-box -->
+<script>
+    function my_md5() {
+        var fake_password=document.getElementById('fake_password');
+        var true_password=document.getElementById('md5_password');
+        true_password.value=md5(fake_password.value);
+
+        $.ajax({
+            url:'/registration_check',
+            data:{"username":$("#username").val(),"pwd":$("#md5_password").val()},
+            success:function (data) {
+
+                if(data===0){
+                    $('#msg1').css("color","red");
+                    $('#msg1').html("账号重复，注册失败！");
+
+                }
+                else{
+                    alert("注册成功！");
+                    window.location.href = '/toLogin'
+                }
+            }
+        })
+
+        return true;
+    }
+</script>
+
+
+
+<!-- jQuery -->
+
+<script th:src="@{/admin/plugins/jquery/jquery.min.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/admin/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/admin/dist/js/plugins/particles.js}"></script>
+<!--&lt;!&ndash;<script th:src="@{/admin/dist/js/plugins/login-bg-particles.js}"></script>&ndash;&gt;气泡-->
+</body>
+</html>

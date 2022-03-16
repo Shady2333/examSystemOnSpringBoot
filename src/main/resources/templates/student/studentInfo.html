@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{layui/css/layui.css}" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+
+<form class="layui-form" action="">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-inline">
+                <input  lay-verify="required" name="studentName" autocomplete="off" class="layui-input" th:value="${student.getStudentName()}">
+            </div>
+        </div>
+
+        <div class="layui-inline">
+            <label class="layui-form-label">性别</label>
+            <div class="layui-input-inline">
+                <select lay-verify="required" name="sex" id="sex" >
+                    <option value="">请选择性别</option>
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">专业</label>
+            <div class="layui-input-inline">
+                <input  lay-verify="required" name="major" autocomplete="off" class="layui-input" th:value="${student.getMajor()}">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">学号</label>
+            <div class="layui-input-inline">
+                <input  lay-verify="required|number" name="cardId" autocomplete="off" class="layui-input" th:value="${student.getCardId()}">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">年级</label>
+            <div class="layui-input-inline">
+                <input  lay-verify="required|number" name="grade" autocomplete="off" class="layui-input" th:value="${student.getGrade()}">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">班级</label>
+            <div class="layui-input-inline">
+                <input  lay-verify="required|number" name="clazz" autocomplete="off" class="layui-input" th:value="${student.getClazz()}">
+            </div>
+        </div>
+
+        <div class="layui-inline">
+            <label class="layui-form-label">学院</label>
+            <div class="layui-input-inline">
+                <select lay-verify="required" name="institute" id="institute" >
+                    <option value="机器人学院">机器人学院</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" id="submit">保存</button>
+        </div>
+    </div>
+</form>
+
+
+<script th:src="@{layui/layui.js}" charset="utf-8"></script>
+<script th:src="@{js/jquery-3.5.1.js}" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        //监听提交
+        form.on('submit(demo1)', function (data) {
+            $.ajax({
+                type: "POST",
+                data: data.field,
+                url: '/student/student/update',
+                success: function (data) {
+                    if(data.code==500){
+                        layer.alert(data.message);
+                        return false;
+                    }
+                    layer.alert(data.message);
+                    // layer.confirm(data.message, function (index) {
+                    //     //window.location.href = "/toExamPage";
+                    // });
+                }
+            })
+            //没有这句话不行，弹出框出不来
+            return false;
+        });
+
+
+    });
+</script>
+
+</body>
+</html>
